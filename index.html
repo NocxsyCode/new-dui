@@ -1,429 +1,1027 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/src/favicon.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
-    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/regular/style.css" />
-    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/fill/style.css" />
-    <title>FRX</title>
-    <script type="module" crossorigin src="./assets/index.b957513f.js"></script>
-    <link rel="stylesheet" href="./assets/index.b284bac3.css">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KOREX.LUA</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;600;700;800;900&display=swap"
+        rel="stylesheet">
     <style>
-      @import "https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap";
-      
-      /* Overrides for Menu and Text Positioning */
-      :root {
-        --menu-x: 2vw !important;
-        --menu-y: 33% !important; /* Move higher */
-      }
-      
-      .PWrapper .PFooter .PBuild {
-        left:50% !important;transform:translateX(-50%); /* Move text more to the left */
-        text-align:center;
-        transition: opacity 0.3s ease-in-out;
-        font-weight: bold !important; /* Make text bold */
-        font-size: 10px !important; /* Even smaller size */
-      }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box
+        }
 
-      /* Fix banner corners - Make square */
-      .PWrapper .PElements .PRightElements {
-        border-radius: 0 !important;
-        overflow: hidden !important;
-      }
-      .PWrapper .PBanner, .PWrapper .PBanner img {
-        border-radius: 0 !important;
-        overflow: hidden !important;
-      }
+        body {
+            background: #12151a;
+            font-family: 'Montserrat', sans-serif;
+            overflow: hidden;
+            width: 100vw;
+            height: 100vh;
+            user-select: none;
+        }
 
-      /* Hide the main DUI until loader is done */
-      #root {
-        opacity: 0;
-        pointer-events: none;
-        transition: opacity 0.5s ease-in;
-      }
+        /* ================= KOREX LOADING ================= */
+        #loader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(8, 9, 12, 0.88);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 99999;
+            transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        }
 
-      /* Hide loader initially */
-      #loader {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0, 0, 0, 0.3);
-        display: none;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        text-align: center;
-        transition: opacity .8s;
-        z-index: 9500;
-      }
-      #loader.show {
-        display: flex;
-      }
-      #loader.hidden {
-        opacity: 0;
-        pointer-events: none;
-      }
-      #loader-title {
-        font-family: 'Montserrat', sans-serif;
-        font-weight: 400;
-        font-size: 16px;
-        letter-spacing: 1px;
-        margin-bottom: 25px;
-        color: #fff;
-        text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000, 0px 2px 4px rgba(0,0,0,0.8);
-      }
-      #barWrap {
-        width: 280px;
-        height: 8px;
-        background: rgba(30, 30, 30, 0.9);
-        border-radius: 10px;
-        border: 1px solid rgba(0, 0, 0, 0.4);
-        position: relative;
-      }
-      #bar {
-        height: 100%;
-        width: 0%;
-        background: #ff0000;
-        border-radius: 10px;
-        box-shadow: 0 0 15px rgba(255, 0, 0, 0.6);
-        transition: width 0.3s ease-out;
-      }
-      #logoGif {
-        width: 35px;
-        height: 35px;
-        margin-bottom: 10px;
-        pointer-events: none;
-      }
-      #loadTxt {
-        font-family: 'Montserrat', sans-serif;
-        margin-top: 10px;
-        font-size: 12px;
-        font-weight: 400;
-        color: #eee;
-        text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000, 0px 2px 4px rgba(0,0,0,0.8);
-      }
+        #loader.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
 
-      /* Watermark Styles */
-      #watermark {
-        position: fixed;
-        top: 15px;
-        right: 15px;
-        z-index: 10000;
-        display: none;
-        align-items: center;
-        background: rgba(20, 20, 20, 0.9);
-        border-radius: 8px;
-        padding: 8px 16px;
-        border-left: 4px solid #ff0000;
-        font-family: 'Montserrat', sans-serif;
-        pointer-events: none;
-        user-select: none;
-        box-shadow: 0 3px 12px rgba(0, 0, 0, 0.7);
-        height: 32px;
-        min-width: 350px;
-        overflow: hidden;
-        position: relative;
-      }
-      
-      #watermark.show {
-        display: flex;
-      }
-      
-      /* Kırmızı parıltı efekti */
-      #watermark::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: -100%;
-        width: 100%;
-        height: 100%;
-        background: linear-gradient(90deg, transparent, rgba(255, 0, 0, 0.3), transparent);
-        animation: shine 5s infinite;
-        z-index: 1;
-      }
-      
-      @keyframes shine {
-        0% { left: -100%; }
-        50% { left: 100%; }
-        100% { left: 100%; }
-      }
-      
-      #watermark .logo-text {
-        margin-right: 18px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: #ff0000;
-        font-weight: bold;
-        font-size: 13px;
-        letter-spacing: 1px;
-        background: #000000;
-        padding: 6px 10px;
-        border-radius: 4px;
-        position: relative;
-        z-index: 2;
-        box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.5);
-      }
-      
-      #watermark .info {
-        display: flex;
-        align-items: center;
-        gap: 0px;
-        color: #999999;
-        font-size: 13px;
-        font-weight: 500;
-        letter-spacing: 0.4px;
-        position: relative;
-        z-index: 2;
-      }
-      
-      #watermark .info span {
-        color: #999999;
-        white-space: nowrap;
-        padding: 0 14px;
-        position: relative;
-        font-family: 'Montserrat', sans-serif;
-        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
-      }
-      
-      #watermark .info span:not(:last-child)::after {
-        content: '';
-        position: absolute;
-        right: 0;
-        top: 50%;
-        transform: translateY(-50%);
-        width: 1px;
-        height: 18px;
-        background: #444444;
-        box-shadow: 1px 0 0 rgba(255, 255, 255, 0.1);
-      }
+        #logoGif {
+            width: 48px;
+            height: 48px;
+            margin-bottom: 12px;
+            filter: drop-shadow(0 0 15px rgba(255, 0, 0, 0.8));
+            animation: pulseLogo 2s infinite ease-in-out;
+        }
 
-      #root {
-        padding: 8px 12px;
-        display: flex;
-        flex-direction: column;
-        gap: 4px;
-      }
+        @keyframes pulseLogo {
 
-      .PCategory {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding: 10px 14px;
-        background: rgba(255, 255, 255, 0.04);
-        border: 1px solid rgba(255, 255, 255, 0.08);
-        border-radius: 6px;
-        transition: all 0.15s ease;
-      }
-      .PCategory.selected {
-        background: rgba(255, 51, 102, 0.18);
-        border-color: #ff3366;
-        transform: translateX(3px);
-        box-shadow: 0 0 12px rgba(255, 51, 102, 0.2);
-      }
-      .PTLabel {
-        font-size: 13px;
-        font-weight: 600;
-        color: #e0e0e0;
-        letter-spacing: 0.5px;
-        font-family: 'Montserrat', sans-serif;
-      }
-      .PTDLabel {
-        font-size: 11px;
-        color: #ff3366;
-      }
+            0%,
+            100% {
+                transform: scale(1)
+            }
+
+            50% {
+                transform: scale(1.08)
+            }
+        }
+
+        #loader-title {
+            font-weight: 800;
+            font-size: 14px;
+            letter-spacing: 3px;
+            color: #ffffff;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            text-shadow: 0 0 12px rgba(255, 0, 0, 0.5);
+        }
+
+        #barWrap {
+            width: 230px;
+            height: 4.5px;
+            background: rgba(25, 28, 35, 0.95);
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.8);
+        }
+
+        #bar {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #990000, #cc0000, #ff2244);
+            border-radius: 10px;
+            box-shadow: 0 0 12px rgba(255, 0, 0, 0.6);
+            transition: width 0.15s ease;
+        }
+
+        #loadTxt {
+            margin-top: 10px;
+            font-size: 9.5px;
+            color: #8892a0;
+            letter-spacing: 1px;
+            font-weight: 600;
+        }
+
+        /* ================= MENÜ WRAPPER ================= */
+        .outer-wrapper {
+            position: fixed;
+            left: 35px;
+            top: 50%;
+            transform: translateY(-50%);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .outer-wrapper.show {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        /* Yan Gösterge Barı */
+        .side-bar {
+            position: absolute;
+            left: -10px;
+            top: 115px;
+            width: 5px;
+            height: 70px;
+            background: #cc0000;
+            border-radius: 4px;
+            box-shadow: 0 0 10px rgba(204, 0, 0, 0.65);
+            transition: top 0.16s ease, background 0.2s ease, box-shadow 0.2s ease;
+            z-index: 10;
+        }
+
+        .side-bar.active-green {
+            background: #00e676;
+            box-shadow: 0 0 12px rgba(0, 230, 118, 0.8);
+        }
+
+        /* Menü Kutusu (Geniş & Şeffaf Glassmorphism) */
+        .menu-box {
+            position: relative;
+            width: 350px;
+            background: rgba(14, 17, 23, 0.72);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: 14px;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.75), 0 0 1px rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Orijinal Banner */
+        .banner {
+            width: 100%;
+            height: 95px;
+            position: relative;
+            overflow: hidden;
+            background: rgba(0, 0, 0, 0.5);
+            flex-shrink: 0;
+        }
+
+        .banner img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .banner::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 45px;
+            background: linear-gradient(transparent, rgba(14, 17, 23, 0.85));
+        }
+
+        .banner-title {
+            position: absolute;
+            bottom: 9px;
+            left: 16px;
+            font-size: 28px;
+            font-weight: 900;
+            color: #ffffff;
+            letter-spacing: 0.5px;
+            text-shadow: 0 3px 12px rgba(0, 0, 0, 0.95);
+            z-index: 2;
+        }
+
+        /* Sekmeler */
+        .tabs {
+            display: flex;
+            width: 100%;
+            background: rgba(8, 10, 14, 0.65);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+            overflow-x: auto;
+            flex-shrink: 0;
+        }
+
+        .tabs::-webkit-scrollbar {
+            display: none;
+        }
+
+        .tab {
+            flex: 1;
+            min-width: 68px;
+            text-align: center;
+            padding: 9px 8px;
+            font-size: 10.5px;
+            font-weight: 700;
+            color: #838e9e;
+            cursor: pointer;
+            transition: all 0.18s ease;
+            white-space: nowrap;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .tab:hover {
+            color: #ffffff;
+            background: rgba(255, 255, 255, 0.03);
+        }
+
+        .tab.active {
+            background: rgba(0, 143, 67, 0.85);
+            color: #ffffff;
+            box-shadow: inset 0 -2px 0 #00e676;
+        }
+
+        /* Özellikler Listesi */
+        .items-list {
+            background: rgba(12, 15, 20, 0.5);
+            height: 230px;
+            overflow-y: auto;
+            padding: 4px 2px;
+            scroll-behavior: smooth;
+        }
+
+        .items-list::-webkit-scrollbar {
+            width: 3px;
+        }
+
+        .items-list::-webkit-scrollbar-thumb {
+            background: rgba(0, 143, 67, 0.8);
+            border-radius: 3px;
+        }
+
+        .items-list::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        /* Tekil Özellik Satırı */
+        .item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 6px 14px;
+            min-height: 28px;
+            margin: 2px 4px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.1s ease;
+        }
+
+        .item:hover {
+            background: rgba(255, 255, 255, 0.04);
+        }
+
+        .item.selected {
+            background: rgba(180, 0, 0, 0.42) !important;
+            box-shadow: inset 3px 0 0 #cc0000;
+        }
+
+        .item.selected.has-on {
+            background: rgba(0, 170, 80, 0.35) !important;
+            box-shadow: inset 3px 0 0 #00e676;
+        }
+
+        .item-name {
+            font-size: 11px;
+            font-weight: 600;
+            color: #a0abbd;
+            letter-spacing: 0.2px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .item.selected .item-name {
+            color: #ffffff;
+            font-weight: 700;
+        }
+
+        /* Sağ Taraf */
+        .item-right {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* Slider Bar */
+        .slider-wrap {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .slider-bar-fill {
+            width: 65px;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.12);
+            border-radius: 2px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .slider-bar-fill .fill {
+            height: 100%;
+            background: #00e676;
+            border-radius: 2px;
+            transition: width 0.15s ease;
+        }
+
+        .slider-val-txt {
+            font-size: 9px;
+            font-weight: 600;
+            color: #00e676;
+            min-width: 24px;
+            text-align: right;
+        }
+
+        /* Alt Etiket */
+        .sub-label {
+            font-size: 9.5px;
+            color: #727e90;
+            font-weight: 500;
+        }
+
+        .item.selected .sub-label {
+            color: #b2bfd4;
+        }
+
+        /* Ok */
+        .arrow {
+            color: #636f82;
+            font-size: 11px;
+            font-weight: 700;
+        }
+
+        .item.selected .arrow {
+            color: #ffffff;
+        }
+
+        /* Switch */
+        .switch {
+            width: 28px;
+            height: 14px;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.14);
+            position: relative;
+            transition: background 0.18s ease;
+        }
+
+        .switch::after {
+            content: '';
+            position: absolute;
+            top: 1.5px;
+            left: 2px;
+            width: 11px;
+            height: 11px;
+            border-radius: 50%;
+            background: #ffffff;
+            transition: left 0.18s cubic-bezier(0.2, 0.8, 0.2, 1);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+        }
+
+        .switch.on {
+            background: #00c853;
+            box-shadow: 0 0 8px rgba(0, 200, 83, 0.7);
+        }
+
+        .switch.on::after {
+            left: 15px;
+        }
+
+        /* Alt Bilgi */
+        .footer {
+            background: rgba(7, 9, 12, 0.75);
+            padding: 7px 14px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 10px;
+            font-weight: 600;
+            color: #616c7d;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+            flex-shrink: 0;
+        }
+
+        .footer-link {
+            color: #7b889b;
+            letter-spacing: 0.4px;
+        }
+
+        .footer-count {
+            color: #7b889b;
+            font-variant-numeric: tabular-nums;
+        }
+
+        /* ================= NOTIFICATION TOAST SYSTEM ================= */
+        #notifyContainer {
+            position: fixed;
+            top: 50px;
+            right: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            z-index: 999999;
+            pointer-events: none;
+        }
+
+        .toast {
+            display: flex;
+            align-items: center;
+            background: rgba(14, 18, 24, 0.94);
+            backdrop-filter: blur(14px);
+            border-left: 3.5px solid #00e676;
+            border-radius: 6px;
+            padding: 9px 14px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.75);
+            min-width: 220px;
+            max-width: 290px;
+            color: #ffffff;
+            transform: translateX(120%);
+            opacity: 0;
+            transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .toast.toast-error {
+            border-left-color: #ff2244;
+        }
+
+        .toast.show {
+            transform: translateX(0);
+            opacity: 1;
+        }
+
+        .toast-icon {
+            margin-right: 10px;
+            font-size: 14px;
+            color: #00e676;
+        }
+
+        .toast.toast-error .toast-icon {
+            color: #ff2244;
+        }
+
+        .toast-body {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .toast-title {
+            font-size: 10.5px;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+            color: #ffffff;
+        }
+
+        .toast-msg {
+            font-size: 9.5px;
+            color: #a2adb9;
+            font-weight: 500;
+            margin-top: 1px;
+        }
+
+        /* Watermark */
+        #watermark {
+            position: fixed;
+            top: 10px;
+            right: 12px;
+            z-index: 9999;
+            display: none;
+            align-items: center;
+            background: rgba(10, 12, 16, 0.88);
+            backdrop-filter: blur(10px);
+            border-radius: 5px;
+            padding: 4px 10px;
+            border-left: 3px solid #cc0000;
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.6);
+            font-size: 10px;
+            font-weight: 600;
+            color: #888;
+        }
+
+        #watermark.show {
+            display: flex;
+        }
+
+        .wm-badge {
+            color: #ff2244;
+            background: #14171d;
+            padding: 2px 5px;
+            border-radius: 3px;
+            font-weight: 800;
+            margin-right: 6px;
+        }
+
+        .wm-text {
+            padding: 0 5px;
+        }
     </style>
-  </head>
-  <body>
+</head>
 
-    <!-- FRX Loading Screen -->
+<body>
+
+    <!-- NOTIFICATIONS CONTAINER -->
+    <div id="notifyContainer"></div>
+
+    <!-- KOREX LOADING EKRANI -->
     <div id="loader">
-      <img id="logoGif" src="https://i.hizliresim.com/4jo3but.png" alt="logo">
-      <div id="loader-title">FRX LOADING</div>
-      <div id="barWrap">
-        <div id="bar"></div>
-      </div>
-      <div id="loadTxt">Loading... 0%</div>
+        <img id="logoGif" src="https://i.hizliresim.com/4jo3but.png" alt="KOREX">
+        <div id="loader-title">KOREX LOADING</div>
+        <div id="barWrap">
+            <div id="bar"></div>
+        </div>
+        <div id="loadTxt">Loading... 0%</div>
     </div>
 
-    <!-- Main DUI -->
-    <div id="root"></div>
+    <!-- Watermark -->
+    <div id="watermark">
+        <span class="wm-badge">KOREX</span>
+        <span class="wm-text">BUILD: 262119</span> |
+        <span class="wm-text">KOREX.LUA</span> |
+        <span class="wm-text">discord.gg/mhshop</span>
+    </div>
+
+    <!-- Menü Outer Wrapper -->
+    <div class="outer-wrapper" id="menuWrapper">
+        <!-- Yan Gösterge Barı -->
+        <div class="side-bar" id="sideBar"></div>
+
+        <!-- Menü Kutusu -->
+        <div class="menu-box">
+            <!-- Orijinal Banner -->
+            <div class="banner">
+                <img id="bannerImg"
+                    src="https://media.discordapp.net/attachments/1499142323714396380/1521121975651667978/attachment.gif?ex=6a9ff7bc&is=6a9ea63c&hm=41444d5e24f0e0813ccaec1b324b75387a0105a60647881d0b0aca5a9dc3b33a&="
+                    alt="Banner">
+                <div class="banner-title" id="banTitle">KOREX.LUA</div>
+            </div>
+
+            <!-- Sekmeler -->
+            <div class="tabs" id="tabs"></div>
+
+            <!-- Özellikler -->
+            <div class="items-list" id="itemsList"></div>
+
+            <!-- Alt Bilgi -->
+            <div class="footer">
+                <span class="footer-link" id="footLink">KOREX.LUA</span>
+                <span class="footer-count" id="footCount">1/18</span>
+            </div>
+        </div>
+    </div>
 
     <script>
-      // Loader Logic
-      const bar = document.getElementById('bar');
-      const loadTxt = document.getElementById('loadTxt');
-      const loaderTitle = document.getElementById('loader-title');
-      const loader = document.getElementById('loader');
-      let p = 0;
-      
-      setTimeout(() => {
-        const loader = document.getElementById('loader');
-        
-        loader.classList.add('show');
-        
-        const interval = setInterval(() => {
-          p += Math.random() * 15 + 5;
-          if (p >= 100) {
-            p = 100;
-            clearInterval(interval);
-            bar.style.width = '100%';
-            loadTxt.textContent = 'Loading... 100%';
-            loaderTitle.textContent = 'FRX LUA INJECTING...';
-            
-            setTimeout(() => {
-              loader.classList.add('hidden');
-              
-              const rootEl = document.getElementById('root');
-              if (rootEl) {
-                rootEl.style.opacity = '1';
-                rootEl.style.pointerEvents = 'auto';
-              }
-
-              setTimeout(() => loader.remove(), 850);
-            }, 800);
-          } else {
-            bar.style.width = p + '%';
-            loadTxt.textContent = 'Loading... ' + Math.round(p) + '%';
-          }
-        }, 200);
-      }, 1400);
-
-      // FRX.LUA Watermark Cycling Logic
-      setInterval(() => {
-        const buildTexts = document.querySelectorAll('.PBuild');
-        if (buildTexts.length > 0) {
-          buildTexts.forEach(el => {
-            el.style.opacity = '0';
-            setTimeout(() => {
-              if (el.textContent === 'FRX.LUA') {
-                el.textContent = 'discord.gg/mhshop';
-              } else {
-                el.textContent = 'FRX.LUA';
-              }
-              el.style.opacity = '1';
-            }, 300);
-          });
-        }
-      }, 5000);
-
-      // ═══════════════════════════════════════
-      // LUA DUI MESSAGE HANDLER - KEYSER MENU
-      // ═══════════════════════════════════════
-      (function() {
-        var root = document.getElementById('root');
-        var currentView = 'main';
-        var mainItems = [];
-        var subItems = [];
-        var selectedIdx = 0;
-
-        function el(tag, cls, html) {
-          var e = document.createElement(tag);
-          if (cls) e.className = cls;
-          if (html) e.innerHTML = html;
-          return e;
+        // ================= NOTIFY SISTEMI =================
+        var notifyContainer = document.getElementById('notifyContainer');
+        function showNotify(title, msg, isSuccess) {
+            if (isSuccess === undefined) isSuccess = true;
+            var toast = document.createElement('div');
+            toast.className = 'toast' + (isSuccess ? '' : ' toast-error');
+            toast.innerHTML =
+                '<span class="toast-icon">' + (isSuccess ? '&#10004;' : '&#10006;') + '</span>' +
+                '<div class="toast-body">' +
+                '<span class="toast-title">' + title + '</span>' +
+                '<span class="toast-msg">' + msg + '</span>' +
+                '</div>';
+            notifyContainer.appendChild(toast);
+            setTimeout(function () { toast.classList.add('show'); }, 10);
+            setTimeout(function () {
+                toast.classList.remove('show');
+                setTimeout(function () { toast.remove(); }, 350);
+            }, 2400);
         }
 
-        function renderMain() {
-          root.innerHTML = '';
-          for (var i = 0; i < mainItems.length; i++) {
-            var item = mainItems[i];
-            var div = el('div', 'PCategory' + (i === selectedIdx ? ' selected' : ''));
-            div.innerHTML = '<span class="PTLabel">' + item.label + '</span>' +
-              (item.arrow ? '<span class="PTDLabel">&#9654;</span>' : '');
-            root.appendChild(div);
-          }
-        }
+        // ================= LOADER =================
+        (function () {
+            var bar = document.getElementById('bar');
+            var lt = document.getElementById('loadTxt');
+            var ti = document.getElementById('loader-title');
+            var lo = document.getElementById('loader');
+            var mw = document.getElementById('menuWrapper');
+            var wm = document.getElementById('watermark');
+            var progress = 0;
 
-        function renderSub() {
-          root.innerHTML = '';
+            var iv = setInterval(function () {
+                progress += Math.random() * 14 + 6;
+                if (progress >= 100) {
+                    progress = 100;
+                    clearInterval(iv);
+                    bar.style.width = '100%';
+                    lt.textContent = 'Loading... 100%';
+                    ti.textContent = 'KOREX LUA INJECTING...';
+                    setTimeout(function () {
+                        lo.classList.add('hidden');
+                        mw.classList.add('show');
+                        wm.classList.add('show');
+                        showNotify('KOREX.LUA', 'Menu injected successfully!', true);
+                        setTimeout(function () { lo.style.display = 'none'; }, 600);
+                    }, 600);
+                } else {
+                    bar.style.width = progress + '%';
+                    lt.textContent = 'Loading... ' + Math.round(progress) + '%';
+                }
+            }, 120);
 
-          for (var i = 0; i < subItems.length; i++) {
-            var item = subItems[i];
-            var realIdx = i;
-            var div = el('div', 'PCategory' + (realIdx === selectedIdx ? ' selected' : ''));
-            var right = '';
-            if (item.type === 'toggle') {
-              right = item.value
-                ? '<span class="PTDLabel" style="color:#ff3366;">&#10003;</span>'
-                : '<span class="PTDLabel" style="color:#555;">&#9675;</span>';
-            } else if (item.label && item.label.indexOf('>>') > -1) {
-              right = '<span class="PTDLabel">&#9654;</span>';
+            lo.addEventListener('click', function () {
+                clearInterval(iv);
+                lo.classList.add('hidden');
+                mw.classList.add('show');
+                wm.classList.add('show');
+                showNotify('KOREX.LUA', 'Menu ready!', true);
+                setTimeout(function () { lo.style.display = 'none'; }, 300);
+            });
+        })();
+
+        // ================= SUBMENUS (FREECAM, NOCLIP) =================
+        var SUB_PAGES = {
+            freecam_menu: [
+                { name: "<< Back", type: "back_btn" },
+                { name: "Freecam Toggle [H]", type: "toggle", val: false, act: function (v) { showNotify("Freecam", v ? "Enabled [H]" : "Disabled", v); } },
+                { name: "Freecam Speed", type: "slider", val: 2.5, min: 0.5, max: 10, step: 0.5, act: function (v) { showNotify("Freecam Speed", v + "x", true); } },
+                { name: "Teleport to Freecam", type: "button", act: function () { showNotify("Teleport", "Teleported to Freecam position!", true); } },
+                { name: "Spawn Object at Cam", type: "button", act: function () { showNotify("Object", "Object spawned at camera target", true); } }
+            ],
+            noclip_menu: [
+                { name: "<< Back", type: "back_btn" },
+                { name: "NoClip Toggle [Y]", type: "toggle", val: false, act: function (v) { showNotify("NoClip", v ? "Enabled [Y]" : "Disabled", v); } },
+                { name: "NoClip Speed", type: "slider", val: 3.0, min: 1.0, max: 15, step: 1.0, act: function (v) { showNotify("NoClip Speed", v + "x", true); } }
+            ]
+        };
+
+        // ================= DATABASE (ENGLISH) =================
+        var TABS = [
+            { id: 'Player', name: 'Player' },
+            { id: 'Misc', name: 'Misc' },
+            { id: 'Exploit', name: 'Exploit' },
+            { id: 'Bypass', name: 'Bypass' },
+            { id: 'Online', name: 'Online' },
+            { id: 'Visual', name: 'Visual' },
+            { id: 'Weapon', name: 'Weapon' },
+            { id: 'Vehicle', name: 'Vehicle' },
+            { id: 'ERP', name: 'ERP' }
+        ];
+
+        var MENU_DATABASE = {
+            Player: [
+                { name: "Revive (Native)", type: "button", act: function () { showNotify("Player", "Native Revive applied!", true); } },
+                { name: "Revive (Framework)", type: "button", act: function () { showNotify("Player", "Framework Revive triggered!", true); } },
+                { name: "Health", type: "slider", val: 100, min: 0, max: 100, step: 10, act: function (v) { showNotify("Health", "Health set to " + v + "%", true); } },
+                { name: "Armor", type: "slider", val: 100, min: 0, max: 100, step: 10, act: function (v) { showNotify("Armor", "Armor set to " + v + "%", true); } },
+                { name: "Godmode", type: "toggle", sub: "- Basic -", val: true, act: function (v) { showNotify("Godmode", v ? "Enabled" : "Disabled", v); } },
+                { name: "Freecam", type: "submenu", target: "freecam_menu" },
+                { name: "NoClip", type: "submenu", target: "noclip_menu" },
+                { name: "Interior Speed", type: "slider_toggle", val: true, act: function (v) { showNotify("Interior Speed", v ? "Enabled (x2.5)" : "Disabled", v); } },
+                { name: "Invisibility", type: "toggle", val: false, act: function (v) { showNotify("Invisibility", v ? "Enabled" : "Disabled", v); } },
+                { name: "Full Invisibility [Admins, ESP]", type: "toggle", val: false, act: function (v) { showNotify("Stealth", v ? "Admin & ESP Bypass Enabled" : "Disabled", v); } },
+                { name: "Fast Run", type: "toggle", val: false, act: function (v) { showNotify("Fast Run", v ? "Enabled" : "Disabled", v); } },
+                { name: "Super Jump", type: "toggle", val: false, act: function (v) { showNotify("Super Jump", v ? "Enabled" : "Disabled", v); } },
+                { name: "No Ragdoll", type: "toggle", val: false, act: function (v) { showNotify("No Ragdoll", v ? "Enabled" : "Disabled", v); } },
+                { name: "Infinite Stamina", type: "toggle", val: false, act: function (v) { showNotify("Stamina", v ? "Infinite Stamina Enabled" : "Disabled", v); } },
+                { name: "Suicide", type: "button", act: function () { showNotify("Player", "Character killed", false); } },
+                { name: "Random Outfit", type: "button", act: function () { showNotify("Ped", "Random outfit equipped!", true); } },
+                { name: "Change Ped", type: "button", act: function () { showNotify("Ped", "Ped model changed!", true); } }
+            ],
+            Misc: [
+                { name: "Tx - Noclip", type: "toggle", val: false, act: function (v) { showNotify("TxAdmin", "Noclip: " + (v ? "Enabled" : "Disabled"), v); } },
+                { name: "Tx - Godmode", type: "toggle", val: false, act: function (v) { showNotify("TxAdmin", "Godmode: " + (v ? "Enabled" : "Disabled"), v); } },
+                { name: "Tx - SuperJump", type: "toggle", val: false, act: function (v) { showNotify("TxAdmin", "SuperJump: " + (v ? "Enabled" : "Disabled"), v); } },
+                { name: "Tx - Teleport to Waypoint", type: "button", act: function () { showNotify("Teleport", "Teleported to Waypoint!", true); } },
+                { name: "Tx - Max Health", type: "button", act: function () { showNotify("TxAdmin", "Health Refilled!", true); } },
+                { name: "Tx - Repair Vehicle", type: "button", act: function () { showNotify("TxAdmin", "Vehicle Repaired!", true); } },
+                { name: "Tx - Show Player IDs", type: "toggle", val: false, act: function (v) { showNotify("Player IDs", v ? "Visible" : "Hidden", v); } }
+            ],
+            Exploit: [
+                { name: "Black Hole", type: "toggle", val: false, act: function (v) { showNotify("Black Hole", v ? "Active" : "Disabled", v); } },
+                { name: "Kill All", type: "button", act: function () { showNotify("Exploit", "Targeting all players...", false); } },
+                { name: "Warp (300m Vehicles)", type: "button", act: function () { showNotify("Warp", "All nearby vehicles pulled!", true); } },
+                { name: "Attach Objects to Everyone", type: "button", act: function () { showNotify("Crash", "Props attached!", true); } },
+                { name: "Object Spam Loop", type: "toggle", val: false, act: function (v) { showNotify("Spam Loop", v ? "Started" : "Stopped", v); } },
+                { name: "Megaphone (500m Voice)", type: "toggle", val: false, act: function (v) { showNotify("Voice", v ? "Broadcasting 500m" : "Normal", v); } }
+            ],
+            Bypass: [
+                { name: "Bypass Anti-Cheat", type: "toggle", val: true, act: function (v) { showNotify("Bypass", v ? "Anticheat Blocked!" : "Inactive", v); } },
+                { name: "Block Spectate", type: "toggle", val: true, act: function (v) { showNotify("Spectate Block", v ? "Active" : "Inactive", v); } },
+                { name: "Spoof Hardware ID", type: "button", act: function () { showNotify("HWID", "Hardware ID Spoofed!", true); } },
+                { name: "Unload Hook", type: "button", act: function () { showNotify("Hook", "Memory Hook Cleared", true); } }
+            ],
+            Online: [
+                { name: "Enter Target ID", type: "button", act: function () { var id = prompt("Target Player ID:", "1"); if (id) showNotify("Target", "Selected ID: " + id, true); } },
+                { name: "Teleport to Player", type: "button", act: function () { showNotify("Teleport", "Teleported to Player!", true); } },
+                { name: "Spectate Player", type: "toggle", val: false, act: function (v) { showNotify("Spectate", v ? "Spectating" : "Stopped", v); } },
+                { name: "Rob Inventory (Closest)", type: "button", act: function () { showNotify("Inventory", "Opening closest inventory...", true); } }
+            ],
+            Visual: [
+                { name: "ESP Box", type: "toggle", val: false, act: function (v) { showNotify("ESP", "Box: " + (v ? "Enabled" : "Disabled"), v); } },
+                { name: "ESP Skeleton", type: "toggle", val: false, act: function (v) { showNotify("ESP", "Skeleton: " + (v ? "Enabled" : "Disabled"), v); } },
+                { name: "ESP Name & Distance", type: "toggle", val: false, act: function (v) { showNotify("ESP", "Name & Distance: " + (v ? "Enabled" : "Disabled"), v); } },
+                { name: "ESP Line (Tracers)", type: "toggle", val: false, act: function (v) { showNotify("ESP", "Tracers: " + (v ? "Enabled" : "Disabled"), v); } },
+                { name: "ESP Health & Armor", type: "toggle", val: false, act: function (v) { showNotify("ESP", "Health & Armor: " + (v ? "Enabled" : "Disabled"), v); } },
+                { name: "Dot Crosshair", type: "toggle", val: false, act: function (v) { showNotify("Crosshair", v ? "Enabled" : "Disabled", v); } }
+            ],
+            Weapon: [
+                { name: "Infinite Ammo", type: "toggle", val: false, act: function (v) { showNotify("Weapon", "Infinite Ammo: " + (v ? "Enabled" : "Disabled"), v); } },
+                { name: "No Recoil & Spread", type: "toggle", val: false, act: function (v) { showNotify("Weapon", "Zero Recoil: " + (v ? "Enabled" : "Disabled"), v); } },
+                { name: "Spawn Glock 19", type: "button", act: function () { showNotify("Weapon", "WEAPON_PISTOL added!", true); } },
+                { name: "Give All Weapons", type: "button", act: function () { showNotify("Weapon", "All weapons added!", true); } }
+            ],
+            Vehicle: [
+                { name: "Vehicle Godmode", type: "toggle", val: false, act: function (v) { showNotify("Vehicle", "Vehicle Godmode: " + (v ? "Enabled" : "Disabled"), v); } },
+                { name: "Repair & Clean", type: "button", act: function () { showNotify("Vehicle", "Vehicle repaired & cleaned!", true); } },
+                { name: "Max Upgrades (Tune)", type: "button", act: function () { showNotify("Vehicle", "Max tuning applied!", true); } },
+                { name: "Spawn T20", type: "button", act: function () { showNotify("Vehicle", "Progen T20 spawned!", true); } },
+                { name: "Spawn Sultan", type: "button", act: function () { showNotify("Vehicle", "Karin Sultan spawned!", true); } }
+            ],
+            ERP: [
+                { name: "Target Player ID", type: "button", act: function () { var id = prompt("Target ID:", "1"); if (id) showNotify("ERP", "Target ID set to: " + id, true); } },
+                { name: "Apply Animation to Target", type: "button", act: function () { showNotify("ERP", "Animation applied to target!", true); } },
+                { name: "Fuck Nearest Player", type: "button", act: function () { showNotify("ERP", "Nearest player targeted!", true); } },
+                { name: "Fuck Nearest Exhaust", type: "button", act: function () { showNotify("ERP", "Exhaust animation started!", true); } },
+                { name: "Oral Animation", type: "button", act: function () { showNotify("ERP", "Oral animation playing!", true); } },
+                { name: "Stop Animations", type: "button", act: function () { showNotify("ERP", "All animations stopped.", false); } }
+            ]
+        };
+
+        // ================= NAVIGATION =================
+        var currentTabIdx = 0;
+        var selectedItemIdx = 0;
+        var activeSubPage = null;
+
+        var tabsContainer = document.getElementById('tabs');
+        var itemsContainer = document.getElementById('itemsList');
+        var footCount = document.getElementById('footCount');
+        var sideBar = document.getElementById('sideBar');
+
+        function getCurrentItems() {
+            if (activeSubPage && SUB_PAGES[activeSubPage]) {
+                return SUB_PAGES[activeSubPage];
             }
-            div.innerHTML = '<span class="PTLabel">' + item.label + '</span>' + right;
-            root.appendChild(div);
-          }
+            var curTab = TABS[currentTabIdx];
+            var id = curTab ? (curTab.id || curTab.name) : 'Player';
+            if (id === 'Self') id = 'Player';
+            return MENU_DATABASE[id] || MENU_DATABASE['Player'] || [];
         }
 
-        window.addEventListener('message', function(e) {
-          var d = e.data;
-          if (!d || !d.type) return;
+        function renderTabs() {
+            tabsContainer.innerHTML = '';
+            for (var i = 0; i < TABS.length; i++) {
+                var t = document.createElement('div');
+                t.className = 'tab' + ((i === currentTabIdx && !activeSubPage) ? ' active' : '');
+                t.textContent = TABS[i].name;
+                (function (idx) {
+                    t.addEventListener('click', function () {
+                        activeSubPage = null;
+                        currentTabIdx = idx;
+                        selectedItemIdx = 0;
+                        renderTabs();
+                        renderItems();
+                    });
+                })(i);
+                tabsContainer.appendChild(t);
+            }
+        }
 
-          switch (d.type) {
-            case 'setMainItems':
-              mainItems = d.items || [];
-              currentView = 'main';
-              selectedIdx = 0;
-              renderMain();
-              break;
+        function renderItems() {
+            itemsContainer.innerHTML = '';
+            var items = getCurrentItems();
 
-            case 'enter':
-              currentView = 'sub';
-              subItems = d.subItems || [];
-              selectedIdx = 0;
-              renderSub();
-              break;
+            for (var i = 0; i < items.length; i++) {
+                var item = items[i];
+                var isSel = (i === selectedItemIdx);
+                var isOn = (item.val === true);
 
-            case 'setSubItems':
-              subItems = d.items || [];
-              selectedIdx = 0;
-              renderSub();
-              break;
+                var el = document.createElement('div');
+                el.className = 'item' + (isSel ? ' selected' : '') + (isOn ? ' has-on' : '');
 
-            case 'nav':
-              if (d.dir === 'up') {
-                if (currentView === 'main') {
-                  selectedIdx = (selectedIdx - 1 + mainItems.length) % mainItems.length;
-                  renderMain();
-                } else {
-                  var total = subItems.length;
-                  selectedIdx = (selectedIdx - 1 + total) % total;
-                  renderSub();
+                var nameHtml = '<span class="item-name">' + item.name + '</span>';
+                var rightHtml = '<div class="item-right">';
+
+                if (item.type === 'slider') {
+                    var percent = ((item.val - (item.min || 0)) / ((item.max || 100) - (item.min || 0))) * 100;
+                    rightHtml += '<div class="slider-wrap">' +
+                        '<div class="slider-bar-fill"><div class="fill" style="width:' + percent + '%"></div></div>' +
+                        '<span class="slider-val-txt">' + item.val + (item.max === 100 ? '%' : 'x') + '</span>' +
+                        '</div>';
+                } else if (item.type === 'slider_toggle') {
+                    rightHtml += '<div class="switch' + (item.val ? ' on' : '') + '"></div>';
+                } else if (item.type === 'toggle') {
+                    if (item.sub) {
+                        rightHtml += '<span class="sub-label">' + item.sub + '</span>';
+                    }
+                    rightHtml += '<div class="switch' + (item.val ? ' on' : '') + '"></div>';
+                } else if (item.type === 'submenu' || item.type === 'arrow') {
+                    rightHtml += '<span class="arrow">&gt;</span>';
+                } else if (item.type === 'back_btn') {
+                    rightHtml += '<span class="arrow">&lt;</span>';
                 }
-              } else if (d.dir === 'down') {
-                if (currentView === 'main') {
-                  selectedIdx = (selectedIdx + 1) % mainItems.length;
-                  renderMain();
-                } else {
-                  var total = subItems.length;
-                  selectedIdx = (selectedIdx + 1) % total;
-                  renderSub();
+                rightHtml += '</div>';
+
+                el.innerHTML = nameHtml + rightHtml;
+
+                (function (index, itm) {
+                    el.addEventListener('click', function () {
+                        selectedItemIdx = index;
+                        executeItem(itm);
+                    });
+                })(i, item);
+
+                itemsContainer.appendChild(el);
+            }
+
+            updateSelectionOnly();
+        }
+
+        function executeItem(itm) {
+            if (!itm) return;
+
+            if (itm.type === 'toggle' || itm.type === 'slider_toggle') {
+                itm.val = !itm.val;
+                if (itm.act) itm.act(itm.val);
+                updateSelectionOnly();
+            } else if (itm.type === 'slider') {
+                itm.val = Math.round((itm.val + (itm.step || 1)) * 10) / 10;
+                if (itm.val > (itm.max || 100)) itm.val = itm.min || 0;
+                if (itm.act) itm.act(itm.val);
+                renderItems();
+            } else if (itm.type === 'submenu') {
+                activeSubPage = itm.target;
+                selectedItemIdx = 0;
+                showNotify(itm.name, "Submenu opened", true);
+                renderTabs();
+                renderItems();
+            } else if (itm.type === 'back_btn') {
+                activeSubPage = null;
+                selectedItemIdx = 0;
+                renderTabs();
+                renderItems();
+            } else if (itm.type === 'button') {
+                if (itm.act) itm.act();
+            }
+        }
+
+        function updateSelectionOnly() {
+            var items = getCurrentItems();
+            if (items.length > 0) {
+                footCount.textContent = (selectedItemIdx + 1) + '/' + items.length;
+                var all = itemsContainer.querySelectorAll('.item');
+                for (var i = 0; i < all.length; i++) {
+                    var itm = items[i];
+                    if (i === selectedItemIdx) {
+                        all[i].classList.add('selected');
+                    } else {
+                        all[i].classList.remove('selected');
+                    }
+                    if (itm && itm.val) {
+                        all[i].classList.add('has-on');
+                        var sw = all[i].querySelector('.switch');
+                        if (sw) sw.classList.add('on');
+                    } else {
+                        all[i].classList.remove('has-on');
+                        var sw = all[i].querySelector('.switch');
+                        if (sw) sw.classList.remove('on');
+                    }
                 }
-              }
-              break;
 
-            case 'back':
-              currentView = 'main';
-              selectedIdx = 0;
-              renderMain();
-              break;
+                if (all[selectedItemIdx]) {
+                    all[selectedItemIdx].scrollIntoView({ block: 'nearest', behavior: 'smooth' });
 
-            case 'setBanner':
-              var banner = document.querySelector('.PBanner img') || document.querySelector('#banner');
-              if (banner && d.url) banner.src = d.url;
-              break;
+                    var cur = items[selectedItemIdx];
+                    if (cur && cur.val) {
+                        sideBar.classList.add('active-green');
+                    } else {
+                        sideBar.classList.remove('active-green');
+                    }
 
-            case 'updateBuild':
-              var builds = document.querySelectorAll('.PBuild, .PBuildText, #buildInfo');
-              builds.forEach(function(b) { if (d.build) b.textContent = 'BUILD: ' + d.build; });
-              break;
-          }
+                    var offsetTop = all[selectedItemIdx].offsetTop;
+                    var listScroll = itemsContainer.scrollTop;
+                    var finalTop = Math.max(105, Math.min(290, 95 + (offsetTop - listScroll) + 10));
+                    sideBar.style.top = finalTop + 'px';
+                }
+            } else {
+                footCount.textContent = '0/0';
+            }
+        }
+
+        itemsContainer.addEventListener('scroll', function () {
+            var all = itemsContainer.querySelectorAll('.item');
+            if (all[selectedItemIdx]) {
+                var offsetTop = all[selectedItemIdx].offsetTop;
+                var listScroll = itemsContainer.scrollTop;
+                var finalTop = Math.max(105, Math.min(290, 95 + (offsetTop - listScroll) + 10));
+                sideBar.style.top = finalTop + 'px';
+            }
         });
-      })();
+
+        renderTabs();
+        renderItems();
+
+        // ================= KEYBOARD CONTROLS =================
+        window.addEventListener('keydown', function (e) {
+            var items = getCurrentItems();
+            if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                if (items.length > 0) {
+                    selectedItemIdx = (selectedItemIdx - 1 + items.length) % items.length;
+                    updateSelectionOnly();
+                }
+            } else if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                if (items.length > 0) {
+                    selectedItemIdx = (selectedItemIdx + 1) % items.length;
+                    updateSelectionOnly();
+                }
+            } else if (e.key === 'ArrowLeft') {
+                e.preventDefault();
+                var itm = items[selectedItemIdx];
+                if (itm && itm.type === 'slider') {
+                    itm.val = Math.round((itm.val - (itm.step || 1)) * 10) / 10;
+                    if (itm.val < (itm.min || 0)) itm.val = itm.max || 100;
+                    if (itm.act) itm.act(itm.val);
+                    renderItems();
+                } else {
+                    activeSubPage = null;
+                    currentTabIdx = (currentTabIdx - 1 + TABS.length) % TABS.length;
+                    selectedItemIdx = 0;
+                    renderTabs();
+                    renderItems();
+                }
+            } else if (e.key === 'ArrowRight') {
+                e.preventDefault();
+                var itm = items[selectedItemIdx];
+                if (itm && itm.type === 'slider') {
+                    itm.val = Math.round((itm.val + (itm.step || 1)) * 10) / 10;
+                    if (itm.val > (itm.max || 100)) itm.val = itm.min || 0;
+                    if (itm.act) itm.act(itm.val);
+                    renderItems();
+                } else {
+                    activeSubPage = null;
+                    currentTabIdx = (currentTabIdx + 1) % TABS.length;
+                    selectedItemIdx = 0;
+                    renderTabs();
+                    renderItems();
+                }
+            } else if (e.key === 'Enter') {
+                e.preventDefault();
+                var itm = items[selectedItemIdx];
+                executeItem(itm);
+            } else if (e.key === 'Backspace') {
+                if (activeSubPage) {
+                    e.preventDefault();
+                    activeSubPage = null;
+                    selectedItemIdx = 0;
+                    renderTabs();
+                    renderItems();
+                }
+            }
+        });
+
+        // ================= FIVEM DUI LISTENER =================
+        window.addEventListener('message', function (e) {
+            var d = e.data;
+            if (!d || !d.type) return;
+
+            if (d.type === 'nav') {
+                var items = getCurrentItems();
+                if (items.length > 0) {
+                    if (d.dir === 'up') {
+                        selectedItemIdx = (selectedItemIdx - 1 + items.length) % items.length;
+                    } else {
+                        selectedItemIdx = (selectedItemIdx + 1) % items.length;
+                    }
+                    updateSelectionOnly();
+                }
+            } else if (d.type === 'enter') {
+                if (d.subItems && d.subItems.length) {
+                    var curTab = TABS[currentTabIdx];
+                    var id = curTab ? (curTab.id || curTab.name) : 'Player';
+                    MENU_DATABASE[id] = d.subItems;
+                    selectedItemIdx = 0;
+                    renderItems();
+                } else {
+                    var items = getCurrentItems();
+                    var itm = items[selectedItemIdx];
+                    executeItem(itm);
+                }
+            } else if (d.type === 'back') {
+                if (activeSubPage) {
+                    activeSubPage = null;
+                    selectedItemIdx = 0;
+                    renderTabs();
+                    renderItems();
+                }
+            } else if (d.type === 'setMainItems' && d.items && d.items.length) {
+                TABS = d.items.map(function (x) { return { id: x.label || x, name: x.label || x }; });
+                currentTabIdx = 0;
+                selectedItemIdx = 0;
+                renderTabs();
+                renderItems();
+            } else if (d.type === 'setSubItems' && d.items) {
+                MENU_DATABASE[TABS[currentTabIdx].id] = d.items;
+                selectedItemIdx = 0;
+                renderItems();
+            } else if (d.type === 'setBanner' && d.url) {
+                var b = document.getElementById('bannerImg');
+                if (b) b.src = d.url;
+            }
+        });
     </script>
-  </body>
+</body>
+
 </html>
