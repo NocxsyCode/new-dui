@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <title>KEYSER DUI MENU</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, sans-serif; }
+        body {
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%);
+            color: #e0e0e0;
+            width: 400px;
+            height: 700px;
+            overflow: hidden;
+            user-select: none;
+        }
+        #banner {
+            width: 100%;
+            height: 100px;
+            object-fit: cover;
+            border-bottom: 2px solid #ff3366;
+            box-shadow: 0 4px 20px rgba(255, 51, 102, 0.3);
+        }
+        #title {
+            text-align: center;
+            padding: 10px;
+            font-size: 18px;
+            font-weight: 700;
+            color: #ff3366;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            border-bottom: 1px solid rgba(255, 51, 102, 0.2);
+        }
+        #subTitle {
+            text-align: center;
+            padding: 6px;
+            font-size: 12px;
+            color: #888;
+            display: none;
+        }
+        .container {
+            padding: 10px 15px;
+            height: calc(100% - 100px - 40px);
+            overflow-y: auto;
+            scrollbar-width: thin;
+            scrollbar-color: #ff3366 transparent;
+        }
+        .container::-webkit-scrollbar { width: 6px; }
+        .container::-webkit-scrollbar-track { background: transparent; }
+        .container::-webkit-scrollbar-thumb { background: linear-gradient(180deg, #ff3366, #cc0044); border-radius: 3px; }
+
+        .menu-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 11px 14px;
+            margin: 4px 0;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 51, 102, 0.15);
+            border-radius: 6px;
+            transition: all 0.15s ease;
+        }
+        .menu-item.selected {
+            background: rgba(255, 51, 102, 0.2);
+            border-color: #ff3366;
+            transform: translateX(4px);
+            box-shadow: 0 2px 12px rgba(255, 51, 102, 0.25);
+        }
+        .item-label {
+            font-size: 13px;
+            font-weight: 500;
+            letter-spacing: 0.4px;
+        }
+        .item-label.main-label {
+            font-size: 14px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .arrow { font-size: 11px; color: #ff3366; }
+        .toggle-on {
+            width: 18px; height: 18px;
+            background: #ff3366;
+            border-radius: 3px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 11px; color: #fff; font-weight: bold;
+        }
+        .toggle-off {
+            width: 18px; height: 18px;
+            border: 2px solid #555;
+            border-radius: 3px;
+        }
+        #buildInfo {
+            position: absolute;
+            bottom: 8px;
+            right: 12px;
+            font-size: 10px;
+            color: #555;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+    <img id="banner" src="" alt="banner">
+    <div id="title">KEYSER MENU</div>
+    <div id="subTitle"></div>
+    <div class="container" id="container"></div>
+    <div id="buildInfo">BUILD: ---</div>
+
+    <script>
+        var currentView = 'main';
+        var mainItems = [];
+        var subItems = [];
+        var selectedIdx = 0;
+
+        var container = document.getElementById('container');
+        var banner = document.getElementById('banner');
+        var titleEl = document.getElementById('title');
+        var subTitleEl = document.getElementById('subTitle');
+        var buildInfo = document.getElementById('buildInfo');
+
+        function renderMain() {
+            container.innerHTML = '';
+            subTitleEl.style.display = 'none';
+            titleEl.textContent = 'KEYSER MENU';
+            for (var i = 0; i < mainItems.length; i++) {
+                var item = mainItems[i];
+                var div = document.createElement('div');
+                div.className = 'menu-item' + (i === selectedIdx ? ' selected' : '');
+                var html = '<span class="item-label main-label">' + item.label + '</span>';
+                if (item.arrow) html += '<span class="arrow">&#9654;</span>';
+                div.innerHTML = html;
+                container.appendChild(div);
+            }
+        }
+
+        function renderSub() {
+            container.innerHTML = '';
+            subTitleEl.style.display = 'block';
+
+            var backDiv = document.createElement('div');
+            backDiv.className = 'menu-item' + (selectedIdx === 0 ? ' selected' : '');
+            backDiv.innerHTML = '<span class="item-label">&#9664; Geri Don</span>';
+            container.appendChild(backDiv);
+
+            for (var i = 0; i < subItems.length; i++) {
+                var item = subItems[i];
+                var realIdx = i + 1;
+                var div = document.createElement('div');
+                div.className = 'menu-item' + (realIdx === selectedIdx ? ' selected' : '');
+
+                var rightHtml = '';
+                if (item.type === 'toggle') {
+                    rightHtml = item.value
+                        ? '<div class="toggle-on">&#10003;</div>'
+                        : '<div class="toggle-off"></div>';
+                } else if (item.label.indexOf('>>') > -1) {
+                    rightHtml = '<span class="arrow">&#9654;</span>';
+                }
+
+                div.innerHTML = '<span class="item-label">' + item.label + '</span>' + rightHtml;
+                container.appendChild(div);
+            }
+        }
+
+        window.addEventListener('message', function(event) {
+            var data = event.data;
+            if (!data || !data.type) return;
+
+            switch (data.type) {
+                case 'setMainItems':
+                    mainItems = data.items || [];
+                    currentView = 'main';
+                    selectedIdx = 0;
+                    renderMain();
+                    break;
+
+                case 'enter':
+                    currentView = 'sub';
+                    subItems = data.subItems || [];
+                    selectedIdx = 0;
+                    subTitleEl.textContent = '---';
+                    renderSub();
+                    break;
+
+                case 'setSubItems':
+                    subItems = data.items || [];
+                    selectedIdx = 0;
+                    renderSub();
+                    break;
+
+                case 'nav':
+                    if (data.dir === 'up') {
+                        if (currentView === 'main') {
+                            selectedIdx = (selectedIdx - 1 + mainItems.length) % mainItems.length;
+                            renderMain();
+                        } else {
+                            var total = subItems.length + 1;
+                            selectedIdx = (selectedIdx - 1 + total) % total;
+                            renderSub();
+                        }
+                    } else if (data.dir === 'down') {
+                        if (currentView === 'main') {
+                            selectedIdx = (selectedIdx + 1) % mainItems.length;
+                            renderMain();
+                        } else {
+                            var total = subItems.length + 1;
+                            selectedIdx = (selectedIdx + 1) % total;
+                            renderSub();
+                        }
+                    }
+                    break;
+
+                case 'back':
+                    currentView = 'main';
+                    selectedIdx = 0;
+                    renderMain();
+                    break;
+
+                case 'setBanner':
+                    if (data.url) banner.src = data.url;
+                    break;
+
+                case 'updateBuild':
+                    if (data.build) buildInfo.textContent = 'BUILD: ' + data.build;
+                    break;
+            }
+        });
+    </script>
+</body>
+</html>
