@@ -1,230 +1,429 @@
 <!DOCTYPE html>
-<html lang="tr">
-<head>
-    <meta charset="UTF-8">
-    <title>KEYSER DUI MENU</title>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/src/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/regular/style.css" />
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/fill/style.css" />
+    <title>FRX</title>
+    <script type="module" crossorigin src="./assets/index.b957513f.js"></script>
+    <link rel="stylesheet" href="./assets/index.b284bac3.css">
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, sans-serif; }
-        body {
-            background: linear-gradient(135deg, #0a0a0a 0%, #1a1a2e 50%, #16213e 100%);
-            color: #e0e0e0;
-            width: 400px;
-            height: 700px;
-            overflow: hidden;
-            user-select: none;
-        }
-        #banner {
-            width: 100%;
-            height: 100px;
-            object-fit: cover;
-            border-bottom: 2px solid #ff3366;
-            box-shadow: 0 4px 20px rgba(255, 51, 102, 0.3);
-        }
-        #title {
-            text-align: center;
-            padding: 10px;
-            font-size: 18px;
-            font-weight: 700;
-            color: #ff3366;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            border-bottom: 1px solid rgba(255, 51, 102, 0.2);
-        }
-        #subTitle {
-            text-align: center;
-            padding: 6px;
-            font-size: 12px;
-            color: #888;
-            display: none;
-        }
-        .container {
-            padding: 10px 15px;
-            height: calc(100% - 100px - 40px);
-            overflow-y: auto;
-            scrollbar-width: thin;
-            scrollbar-color: #ff3366 transparent;
-        }
-        .container::-webkit-scrollbar { width: 6px; }
-        .container::-webkit-scrollbar-track { background: transparent; }
-        .container::-webkit-scrollbar-thumb { background: linear-gradient(180deg, #ff3366, #cc0044); border-radius: 3px; }
+      @import "https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap";
+      
+      /* Overrides for Menu and Text Positioning */
+      :root {
+        --menu-x: 2vw !important;
+        --menu-y: 33% !important; /* Move higher */
+      }
+      
+      .PWrapper .PFooter .PBuild {
+        left:50% !important;transform:translateX(-50%); /* Move text more to the left */
+        text-align:center;
+        transition: opacity 0.3s ease-in-out;
+        font-weight: bold !important; /* Make text bold */
+        font-size: 10px !important; /* Even smaller size */
+      }
 
-        .menu-item {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 11px 14px;
-            margin: 4px 0;
-            background: rgba(255, 255, 255, 0.04);
-            border: 1px solid rgba(255, 51, 102, 0.15);
-            border-radius: 6px;
-            transition: all 0.15s ease;
-        }
-        .menu-item.selected {
-            background: rgba(255, 51, 102, 0.2);
-            border-color: #ff3366;
-            transform: translateX(4px);
-            box-shadow: 0 2px 12px rgba(255, 51, 102, 0.25);
-        }
-        .item-label {
-            font-size: 13px;
-            font-weight: 500;
-            letter-spacing: 0.4px;
-        }
-        .item-label.main-label {
-            font-size: 14px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-        .arrow { font-size: 11px; color: #ff3366; }
-        .toggle-on {
-            width: 18px; height: 18px;
-            background: #ff3366;
-            border-radius: 3px;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 11px; color: #fff; font-weight: bold;
-        }
-        .toggle-off {
-            width: 18px; height: 18px;
-            border: 2px solid #555;
-            border-radius: 3px;
-        }
-        #buildInfo {
-            position: absolute;
-            bottom: 8px;
-            right: 12px;
-            font-size: 10px;
-            color: #555;
-            font-family: monospace;
-        }
+      /* Fix banner corners - Make square */
+      .PWrapper .PElements .PRightElements {
+        border-radius: 0 !important;
+        overflow: hidden !important;
+      }
+      .PWrapper .PBanner, .PWrapper .PBanner img {
+        border-radius: 0 !important;
+        overflow: hidden !important;
+      }
+
+      /* Hide the main DUI until loader is done */
+      #root {
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.5s ease-in;
+      }
+
+      /* Hide loader initially */
+      #loader {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.3);
+        display: none;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+        transition: opacity .8s;
+        z-index: 9500;
+      }
+      #loader.show {
+        display: flex;
+      }
+      #loader.hidden {
+        opacity: 0;
+        pointer-events: none;
+      }
+      #loader-title {
+        font-family: 'Montserrat', sans-serif;
+        font-weight: 400;
+        font-size: 16px;
+        letter-spacing: 1px;
+        margin-bottom: 25px;
+        color: #fff;
+        text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000, 0px 2px 4px rgba(0,0,0,0.8);
+      }
+      #barWrap {
+        width: 280px;
+        height: 8px;
+        background: rgba(30, 30, 30, 0.9);
+        border-radius: 10px;
+        border: 1px solid rgba(0, 0, 0, 0.4);
+        position: relative;
+      }
+      #bar {
+        height: 100%;
+        width: 0%;
+        background: #ff0000;
+        border-radius: 10px;
+        box-shadow: 0 0 15px rgba(255, 0, 0, 0.6);
+        transition: width 0.3s ease-out;
+      }
+      #logoGif {
+        width: 35px;
+        height: 35px;
+        margin-bottom: 10px;
+        pointer-events: none;
+      }
+      #loadTxt {
+        font-family: 'Montserrat', sans-serif;
+        margin-top: 10px;
+        font-size: 12px;
+        font-weight: 400;
+        color: #eee;
+        text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000, 0px 2px 4px rgba(0,0,0,0.8);
+      }
+
+      /* Watermark Styles */
+      #watermark {
+        position: fixed;
+        top: 15px;
+        right: 15px;
+        z-index: 10000;
+        display: none;
+        align-items: center;
+        background: rgba(20, 20, 20, 0.9);
+        border-radius: 8px;
+        padding: 8px 16px;
+        border-left: 4px solid #ff0000;
+        font-family: 'Montserrat', sans-serif;
+        pointer-events: none;
+        user-select: none;
+        box-shadow: 0 3px 12px rgba(0, 0, 0, 0.7);
+        height: 32px;
+        min-width: 350px;
+        overflow: hidden;
+        position: relative;
+      }
+      
+      #watermark.show {
+        display: flex;
+      }
+      
+      /* Kırmızı parıltı efekti */
+      #watermark::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 0, 0, 0.3), transparent);
+        animation: shine 5s infinite;
+        z-index: 1;
+      }
+      
+      @keyframes shine {
+        0% { left: -100%; }
+        50% { left: 100%; }
+        100% { left: 100%; }
+      }
+      
+      #watermark .logo-text {
+        margin-right: 18px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #ff0000;
+        font-weight: bold;
+        font-size: 13px;
+        letter-spacing: 1px;
+        background: #000000;
+        padding: 6px 10px;
+        border-radius: 4px;
+        position: relative;
+        z-index: 2;
+        box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.5);
+      }
+      
+      #watermark .info {
+        display: flex;
+        align-items: center;
+        gap: 0px;
+        color: #999999;
+        font-size: 13px;
+        font-weight: 500;
+        letter-spacing: 0.4px;
+        position: relative;
+        z-index: 2;
+      }
+      
+      #watermark .info span {
+        color: #999999;
+        white-space: nowrap;
+        padding: 0 14px;
+        position: relative;
+        font-family: 'Montserrat', sans-serif;
+        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+      }
+      
+      #watermark .info span:not(:last-child)::after {
+        content: '';
+        position: absolute;
+        right: 0;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 1px;
+        height: 18px;
+        background: #444444;
+        box-shadow: 1px 0 0 rgba(255, 255, 255, 0.1);
+      }
+
+      #root {
+        padding: 8px 12px;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+      }
+
+      .PCategory {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 10px 14px;
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 6px;
+        transition: all 0.15s ease;
+      }
+      .PCategory.selected {
+        background: rgba(255, 51, 102, 0.18);
+        border-color: #ff3366;
+        transform: translateX(3px);
+        box-shadow: 0 0 12px rgba(255, 51, 102, 0.2);
+      }
+      .PTLabel {
+        font-size: 13px;
+        font-weight: 600;
+        color: #e0e0e0;
+        letter-spacing: 0.5px;
+        font-family: 'Montserrat', sans-serif;
+      }
+      .PTDLabel {
+        font-size: 11px;
+        color: #ff3366;
+      }
     </style>
-</head>
-<body>
-    <img id="banner" src="" alt="banner">
-    <div id="title">KEYSER MENU</div>
-    <div id="subTitle"></div>
-    <div class="container" id="container"></div>
-    <div id="buildInfo">BUILD: ---</div>
+  </head>
+  <body>
+
+    <!-- FRX Loading Screen -->
+    <div id="loader">
+      <img id="logoGif" src="https://i.hizliresim.com/4jo3but.png" alt="logo">
+      <div id="loader-title">FRX LOADING</div>
+      <div id="barWrap">
+        <div id="bar"></div>
+      </div>
+      <div id="loadTxt">Loading... 0%</div>
+    </div>
+
+    <!-- Main DUI -->
+    <div id="root"></div>
 
     <script>
+      // Loader Logic
+      const bar = document.getElementById('bar');
+      const loadTxt = document.getElementById('loadTxt');
+      const loaderTitle = document.getElementById('loader-title');
+      const loader = document.getElementById('loader');
+      let p = 0;
+      
+      setTimeout(() => {
+        const loader = document.getElementById('loader');
+        
+        loader.classList.add('show');
+        
+        const interval = setInterval(() => {
+          p += Math.random() * 15 + 5;
+          if (p >= 100) {
+            p = 100;
+            clearInterval(interval);
+            bar.style.width = '100%';
+            loadTxt.textContent = 'Loading... 100%';
+            loaderTitle.textContent = 'FRX LUA INJECTING...';
+            
+            setTimeout(() => {
+              loader.classList.add('hidden');
+              
+              const rootEl = document.getElementById('root');
+              if (rootEl) {
+                rootEl.style.opacity = '1';
+                rootEl.style.pointerEvents = 'auto';
+              }
+
+              setTimeout(() => loader.remove(), 850);
+            }, 800);
+          } else {
+            bar.style.width = p + '%';
+            loadTxt.textContent = 'Loading... ' + Math.round(p) + '%';
+          }
+        }, 200);
+      }, 1400);
+
+      // FRX.LUA Watermark Cycling Logic
+      setInterval(() => {
+        const buildTexts = document.querySelectorAll('.PBuild');
+        if (buildTexts.length > 0) {
+          buildTexts.forEach(el => {
+            el.style.opacity = '0';
+            setTimeout(() => {
+              if (el.textContent === 'FRX.LUA') {
+                el.textContent = 'discord.gg/mhshop';
+              } else {
+                el.textContent = 'FRX.LUA';
+              }
+              el.style.opacity = '1';
+            }, 300);
+          });
+        }
+      }, 5000);
+
+      // ═══════════════════════════════════════
+      // LUA DUI MESSAGE HANDLER - KEYSER MENU
+      // ═══════════════════════════════════════
+      (function() {
+        var root = document.getElementById('root');
         var currentView = 'main';
         var mainItems = [];
         var subItems = [];
         var selectedIdx = 0;
 
-        var container = document.getElementById('container');
-        var banner = document.getElementById('banner');
-        var titleEl = document.getElementById('title');
-        var subTitleEl = document.getElementById('subTitle');
-        var buildInfo = document.getElementById('buildInfo');
+        function el(tag, cls, html) {
+          var e = document.createElement(tag);
+          if (cls) e.className = cls;
+          if (html) e.innerHTML = html;
+          return e;
+        }
 
         function renderMain() {
-            container.innerHTML = '';
-            subTitleEl.style.display = 'none';
-            titleEl.textContent = 'KEYSER MENU';
-            for (var i = 0; i < mainItems.length; i++) {
-                var item = mainItems[i];
-                var div = document.createElement('div');
-                div.className = 'menu-item' + (i === selectedIdx ? ' selected' : '');
-                var html = '<span class="item-label main-label">' + item.label + '</span>';
-                if (item.arrow) html += '<span class="arrow">&#9654;</span>';
-                div.innerHTML = html;
-                container.appendChild(div);
-            }
+          root.innerHTML = '';
+          for (var i = 0; i < mainItems.length; i++) {
+            var item = mainItems[i];
+            var div = el('div', 'PCategory' + (i === selectedIdx ? ' selected' : ''));
+            div.innerHTML = '<span class="PTLabel">' + item.label + '</span>' +
+              (item.arrow ? '<span class="PTDLabel">&#9654;</span>' : '');
+            root.appendChild(div);
+          }
         }
 
         function renderSub() {
-            container.innerHTML = '';
-            subTitleEl.style.display = 'block';
+          root.innerHTML = '';
 
-            var backDiv = document.createElement('div');
-            backDiv.className = 'menu-item' + (selectedIdx === 0 ? ' selected' : '');
-            backDiv.innerHTML = '<span class="item-label">&#9664; Geri Don</span>';
-            container.appendChild(backDiv);
-
-            for (var i = 0; i < subItems.length; i++) {
-                var item = subItems[i];
-                var realIdx = i + 1;
-                var div = document.createElement('div');
-                div.className = 'menu-item' + (realIdx === selectedIdx ? ' selected' : '');
-
-                var rightHtml = '';
-                if (item.type === 'toggle') {
-                    rightHtml = item.value
-                        ? '<div class="toggle-on">&#10003;</div>'
-                        : '<div class="toggle-off"></div>';
-                } else if (item.label.indexOf('>>') > -1) {
-                    rightHtml = '<span class="arrow">&#9654;</span>';
-                }
-
-                div.innerHTML = '<span class="item-label">' + item.label + '</span>' + rightHtml;
-                container.appendChild(div);
+          for (var i = 0; i < subItems.length; i++) {
+            var item = subItems[i];
+            var realIdx = i;
+            var div = el('div', 'PCategory' + (realIdx === selectedIdx ? ' selected' : ''));
+            var right = '';
+            if (item.type === 'toggle') {
+              right = item.value
+                ? '<span class="PTDLabel" style="color:#ff3366;">&#10003;</span>'
+                : '<span class="PTDLabel" style="color:#555;">&#9675;</span>';
+            } else if (item.label && item.label.indexOf('>>') > -1) {
+              right = '<span class="PTDLabel">&#9654;</span>';
             }
+            div.innerHTML = '<span class="PTLabel">' + item.label + '</span>' + right;
+            root.appendChild(div);
+          }
         }
 
-        window.addEventListener('message', function(event) {
-            var data = event.data;
-            if (!data || !data.type) return;
+        window.addEventListener('message', function(e) {
+          var d = e.data;
+          if (!d || !d.type) return;
 
-            switch (data.type) {
-                case 'setMainItems':
-                    mainItems = data.items || [];
-                    currentView = 'main';
-                    selectedIdx = 0;
-                    renderMain();
-                    break;
+          switch (d.type) {
+            case 'setMainItems':
+              mainItems = d.items || [];
+              currentView = 'main';
+              selectedIdx = 0;
+              renderMain();
+              break;
 
-                case 'enter':
-                    currentView = 'sub';
-                    subItems = data.subItems || [];
-                    selectedIdx = 0;
-                    subTitleEl.textContent = '---';
-                    renderSub();
-                    break;
+            case 'enter':
+              currentView = 'sub';
+              subItems = d.subItems || [];
+              selectedIdx = 0;
+              renderSub();
+              break;
 
-                case 'setSubItems':
-                    subItems = data.items || [];
-                    selectedIdx = 0;
-                    renderSub();
-                    break;
+            case 'setSubItems':
+              subItems = d.items || [];
+              selectedIdx = 0;
+              renderSub();
+              break;
 
-                case 'nav':
-                    if (data.dir === 'up') {
-                        if (currentView === 'main') {
-                            selectedIdx = (selectedIdx - 1 + mainItems.length) % mainItems.length;
-                            renderMain();
-                        } else {
-                            var total = subItems.length + 1;
-                            selectedIdx = (selectedIdx - 1 + total) % total;
-                            renderSub();
-                        }
-                    } else if (data.dir === 'down') {
-                        if (currentView === 'main') {
-                            selectedIdx = (selectedIdx + 1) % mainItems.length;
-                            renderMain();
-                        } else {
-                            var total = subItems.length + 1;
-                            selectedIdx = (selectedIdx + 1) % total;
-                            renderSub();
-                        }
-                    }
-                    break;
+            case 'nav':
+              if (d.dir === 'up') {
+                if (currentView === 'main') {
+                  selectedIdx = (selectedIdx - 1 + mainItems.length) % mainItems.length;
+                  renderMain();
+                } else {
+                  var total = subItems.length;
+                  selectedIdx = (selectedIdx - 1 + total) % total;
+                  renderSub();
+                }
+              } else if (d.dir === 'down') {
+                if (currentView === 'main') {
+                  selectedIdx = (selectedIdx + 1) % mainItems.length;
+                  renderMain();
+                } else {
+                  var total = subItems.length;
+                  selectedIdx = (selectedIdx + 1) % total;
+                  renderSub();
+                }
+              }
+              break;
 
-                case 'back':
-                    currentView = 'main';
-                    selectedIdx = 0;
-                    renderMain();
-                    break;
+            case 'back':
+              currentView = 'main';
+              selectedIdx = 0;
+              renderMain();
+              break;
 
-                case 'setBanner':
-                    if (data.url) banner.src = data.url;
-                    break;
+            case 'setBanner':
+              var banner = document.querySelector('.PBanner img') || document.querySelector('#banner');
+              if (banner && d.url) banner.src = d.url;
+              break;
 
-                case 'updateBuild':
-                    if (data.build) buildInfo.textContent = 'BUILD: ' + data.build;
-                    break;
-            }
+            case 'updateBuild':
+              var builds = document.querySelectorAll('.PBuild, .PBuildText, #buildInfo');
+              builds.forEach(function(b) { if (d.build) b.textContent = 'BUILD: ' + d.build; });
+              break;
+          }
         });
+      })();
     </script>
-</body>
+  </body>
 </html>
